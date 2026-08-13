@@ -12,6 +12,11 @@ throws when three conditions are met at once.
 > import it, assign the role. No build, no Plugin Registration Tool, no code.
 > The rest of this README is for people who want to understand or modify how it works.
 
+**The full write-up is on Medium:
+[Blocking GitHub Copilot Harness Agents in Copilot Studio](https://medium.com/@nada.brisville/blocking-github-copilot-harness-agents-in-copilot-studio-777f96a9e9c9)**,
+covering why this harness needs its own control, how the signal was traced back to the `bot` table,
+and why security roles alone cannot enforce it.
+
 ## How it works
 
 The creation is blocked only if **all three** conditions are true:

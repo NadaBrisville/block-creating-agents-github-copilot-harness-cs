@@ -10,7 +10,9 @@ creating ordinary agents, carries on untouched.
 Count about ten minutes.
 
 If you would rather understand how this works, or build it from source, read the
-[README](README.md) instead.
+[README](README.md). The full write-up, including how the signal behind this was found, is on
+Medium:
+[Blocking GitHub Copilot Harness Agents in Copilot Studio](https://medium.com/@nada.brisville/blocking-github-copilot-harness-agents-in-copilot-studio-777f96a9e9c9).
 
 ---
 
@@ -34,14 +36,11 @@ deleting the solution later.
 
 ## Step 1. Download the solution
 
-Go to the [Releases](../../releases) page of this repository and download the `.zip` asset from the
-latest release. Do not unzip it.
+Go to the [Releases](../../releases) page of this repository and download the `.zip` under
+**Assets**. Take the one named after the solution, not the two **Source code** archives GitHub
+adds automatically. Do not unzip it.
 
-![The Releases page with the solution zip attached](docs/images/01-releases-page.png)
-
-> **[SCREENSHOT NEEDED: `01-releases-page.png`]**
-> The repository Releases page, showing the latest release with the `.zip` under **Assets**.
-> Frame the release title, the version tag and the asset filename together.
+![The Releases page with the solution zip under Assets](docs/images/01-release-assets.png)
 
 ---
 
@@ -51,29 +50,23 @@ Open [make.powerapps.com](https://make.powerapps.com) and switch to the environm
 protect, using the environment picker at the top right. Getting this wrong is the most common
 mistake, so check the name before going further.
 
-### 2.1 Start the import
-
 Go to **Solutions**, then **Import solution** in the command bar.
 
-![Solutions area with the Import solution command](docs/images/02-import-solution-button.png)
+### 2.1 Select the file
 
-> **[SCREENSHOT NEEDED: `02-import-solution-button.png`]**
-> The **Solutions** list with the command bar visible and **Import solution** readable. Include the
-> environment name at the top right if it fits, so readers see where they are.
+The panel opens on **Select a file**, with **Next** greyed out until you give it something.
 
-### 2.2 Select the file
+![The import panel before a file is chosen, with Next disabled](docs/images/02-import-select-file.png)
 
-Choose **Browse**, pick the `.zip` you downloaded, then **Next**.
+Choose **Browse**, pick the `.zip` you downloaded. The filename appears next to the button and
+**Next** becomes available.
 
-![Browsing to the downloaded solution zip](docs/images/03-browse-zip.png)
+![The import panel with the solution zip selected and Next enabled](docs/images/03-import-file-selected.png)
 
-> **[SCREENSHOT NEEDED: `03-browse-zip.png`]**
-> The import panel at the file-selection stage, with the chosen `.zip` filename visible.
+### 2.2 Check the details, and one checkbox
 
-### 2.3 Check the details, and one checkbox
-
-The panel shows the solution name, its type and its version. Expand **Advanced settings** and make
-sure **Enable Plugin steps and flows included in the solution** is **checked**.
+The panel now shows the solution name, its type and its version. Expand **Advanced settings** and
+make sure **Enable Plugin steps and flows included in the solution** is **checked**.
 
 **This checkbox matters more than anything else on this screen.** Left unchecked, the import
 succeeds, every component lands correctly, and the guard blocks nothing at all, with no error
@@ -81,53 +74,40 @@ anywhere to tell you.
 
 ![Import details with Advanced settings expanded and the checkbox ticked](docs/images/04-import-advanced-settings.png)
 
-> **[SCREENSHOT NEEDED: `04-import-advanced-settings.png`]**
-> The import panel showing solution name, **Type: Unmanaged**, the version number, and
-> **Advanced settings** expanded with the checkbox ticked. One image covering all four.
+### 2.3 Confirm the environment variable
 
-### 2.4 Confirm the environment variable
+The wizard asks you to confirm the environment variables carried by the solution.
+`RestrictedRoleName` arrives already filled in with the name of the security role, which is why
+this works without any manual setup.
 
-The wizard asks you to confirm the environment variables carried by the solution. The
-`RestrictedRoleName` variable arrives with its default value already filled in with the name of the
-security role.
+Leave it as it is. The value only needs changing if you intend to point the guard at a role that
+already exists in your environment under a different name, which is covered at the end of this
+guide.
 
-Leave it as it is. The value only needs changing if you intend to use a role that already exists in
-your environment under a different name, which is covered at the end of this guide.
+![The environment variables step with RestrictedRoleName prefilled](docs/images/05-import-environment-variable.png)
 
-![The environment variables step with RestrictedRoleName prefilled](docs/images/05-environment-variable-step.png)
+Then select **Import** and wait. It usually takes a couple of minutes.
 
-> **[SCREENSHOT NEEDED: `05-environment-variable-step.png`]**
-> The **Environment Variables** step of the import wizard, with `RestrictedRoleName` and its
-> prefilled value fully visible. Widen the panel so the whole role name is readable, right through
-> to the final "s" of "Agents".
+### 2.4 Confirm the import
 
-### 2.5 Import
+You should get a green banner, and the solution appears in the **Unmanaged** list with its version
+and publisher.
 
-Select **Import** and wait. It usually takes a couple of minutes.
+![The Solutions list with the success banner and the imported solution](docs/images/06-import-success.png)
 
-![The success banner after import](docs/images/06-import-success.png)
-
-> **[SCREENSHOT NEEDED: `06-import-success.png`]**
-> The green confirmation banner reading that the solution imported successfully.
-
-### 2.6 Confirm what landed
-
-Open the imported solution and go to **Objects**. Four components must be listed:
+Open the solution and go to **Objects**. Four components must be listed:
 
 | Component | Type |
 |---|---|
-| `System Customizer - No GitHub Harness Agents` | Security role |
-| `BotCreationGuard` | Plug-in assembly |
-| `BotCreationGuard.BotCreationGuardPlugin: Create of bot` | Plug-in step |
-| `nadabr_RestrictedRoleName` | Environment variable |
+| `BotCreationGuard` | Plug-In Assembly |
+| `BotCreationGuard.BotCreationGuardPlugin: Create of bot` | Plug-In Step |
+| `RestrictedRoleName` | Environment Variable |
+| `System Customizer - No GitHub Harness Agents` | Security Role |
 
-The **Plug-in step** row is the one to look for. An assembly without its step imports without a
+The **Plug-In Step** row is the one to look for. An assembly without its step imports without a
 single error and blocks nothing.
 
 ![The solution Objects list showing the four components](docs/images/07-solution-objects.png)
-
-> **[SCREENSHOT NEEDED: `07-solution-objects.png`]**
-> The solution's **Objects → All** view, with the four rows and the **Type** column visible.
 
 ---
 
@@ -137,8 +117,10 @@ Nothing is blocked until someone actually holds the restricted role. Assigning i
 user inside the restriction.
 
 Go to the [Power Platform admin center](https://admin.powerplatform.microsoft.com), open your
-environment, then **Settings → Users + permissions → Users**. Pick a user, choose **Manage security
-roles**, tick **System Customizer - No GitHub Harness Agents**, and save.
+environment, then **Settings → Users + permissions → Users**. Select a user, choose **Manage
+security roles**, tick **System Customizer - No GitHub Harness Agents**, and save.
+
+![Manage security roles with the restricted role ticked](docs/images/08-assign-role.png)
 
 A few things worth knowing:
 
@@ -150,13 +132,6 @@ A few things worth knowing:
 - **The role is a copy of System Customizer.** Users receiving it keep the customization rights
   they need, and can still create ordinary agents.
 
-![Assigning the security role to a user](docs/images/08-assign-role.png)
-
-> **[SCREENSHOT NEEDED: `08-assign-role.png`]**
-> Either the **Manage security roles** panel with the role ticked, or the user summary showing
-> `System Customizer - No GitHub Harness Agents` under **Direct Assigned Roles**. The second is
-> clearer, since it proves the assignment took effect.
-
 ---
 
 ## Step 4. Check that it actually works
@@ -166,14 +141,13 @@ lets creations through rather than locking your environment out, which means a b
 and a working one look identical from the outside.
 
 Sign in as a user holding the role, or assign it to yourself, and try to create an agent through
-the CLI / GitHub Copilot harness in Copilot Studio. You should get a red panel carrying the
-plug-in's message, with the role name quoted inside it.
+the CLI / GitHub Copilot harness in Copilot Studio. The creation is rejected, and the plug-in's
+message comes through with the role name quoted inside it.
 
-![Copilot Studio rejecting the creation](docs/images/09-blocked-creation.png)
+![Copilot Studio rejecting the creation, with the plug-in message](docs/images/09-blocked-creation.png)
 
-> **[SCREENSHOT NEEDED: `09-blocked-creation.png`]**
-> The red **"We couldn't create the agent"** panel, with enough of the message underneath readable
-> to see the role name in quotes.
+The generic wrapper (*"We couldn't create the agent"*) comes from Copilot Studio itself. The text
+underneath it is what the plug-in throws.
 
 Then create an ordinary agent with the same user. It should go through without any interference.
 The restriction stays scoped to the single signal it was built to catch.
@@ -214,14 +188,14 @@ Copilot Studio is not provisioned in the target environment, or it runs an older
 **Everything imported, but nothing is blocked.**
 Work through these in order:
 
-1. **Is the Plug-in step in the solution?** Open **Objects** and check the four rows from step 2.6.
+1. **Is the Plug-In Step in the solution?** Open **Objects** and check the four rows from step 2.4.
    A missing step is the most frequent cause.
 2. **Was the Advanced settings checkbox ticked at import?** If not, the step arrived disabled.
    Re-import with the box ticked.
-3. **Does the user actually hold the role?** Check under **Direct Assigned Roles**, or through
+3. **Does the user actually hold the role?** Check under **Manage security roles**, or through
    their team membership.
 4. **Does the environment variable value match the role name exactly?** Compare them character by
-   character, including the final "s".
+   character, including the final "s" of "Agents".
 
 If all four check out, turn on plug-in trace logging and read what the plug-in itself reports. The
 [README](README.md#verifying-it-actually-works) has the full procedure, and the trace names the
