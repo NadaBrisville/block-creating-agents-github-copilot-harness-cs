@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+
+# Signing key -- never commit
+*.snk
+
+# Exported Dataverse solutions (published as GitHub Release assets, not in Git history)
+*.zip
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# NuGet
+*.nupkg
+packages/
+
+# Misc
+*.log
+Thumbs.db
+.DS_Store
