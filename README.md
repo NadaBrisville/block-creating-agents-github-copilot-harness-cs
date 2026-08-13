@@ -7,6 +7,11 @@ Microsoft does not expose a setting to disable this specific agent-creation path
 fills the gap: it intercepts the `Create` message on the `bot` table in **Pre-Operation** and
 throws when three conditions are met at once.
 
+> **Just want it running?** Follow the
+> [Step by step installation](STEP-BY-STEP-INSTALLATION.md) guide instead. Download the solution,
+> import it, assign the role. No build, no Plugin Registration Tool, no code.
+> The rest of this README is for people who want to understand or modify how it works.
+
 ## How it works
 
 The creation is blocked only if **all three** conditions are true:
